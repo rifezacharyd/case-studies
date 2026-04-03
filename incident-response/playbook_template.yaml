@@ -1,0 +1,139 @@
+# Incident Response Playbook Template
+# Tailored for ICS/OT environments in critical infrastructure
+# Customize for your organization's specific systems and procedures
+
+playbook:
+  name: "Critical Infrastructure Incident Response Playbook"
+  version: "1.0"
+  last_updated: "2025-01-02"
+  classification: "INTERNAL USE ONLY"
+
+  # Incident classification tiers
+  severity_levels:
+    critical:
+      description: "Active compromise of OT/ICS systems with potential physical safety impact"
+      response_time: "Immediate (within 15 minutes)"
+      escalation: "Executive leadership, CISA, legal counsel"
+      examples:
+        - "Unauthorized PLC logic modification detected"
+        - "Safety system (SIS) anomaly correlated with cyber indicators"
+        - "Active adversary presence in Level 2 or below (Purdue Model)"
+
+    high:
+      description: "Confirmed IT compromise with evidence of lateral movement toward OT"
+      response_time: "Within 1 hour"
+      escalation: "IR team lead, OT engineering lead, CISO"
+      examples:
+        - "Adversary presence on engineering workstations"
+        - "Compromised credentials for OT-connected accounts"
+        - "Ransomware deployment affecting IT systems with OT adjacency"
+
+    medium:
+      description: "Confirmed IT compromise contained to enterprise network"
+      response_time: "Within 4 hours"
+      escalation: "IR team lead, CISO"
+      examples:
+        - "Malware on corporate endpoints"
+        - "Phishing compromise of employee accounts"
+        - "Unauthorized access to non-OT systems"
+
+    low:
+      description: "Suspicious activity requiring investigation"
+      response_time: "Within 24 hours"
+      escalation: "SOC analyst lead"
+      examples:
+        - "Unusual network traffic patterns"
+        - "Failed authentication attempts from unexpected sources"
+        - "Vendor reports of potential compromise"
+
+  # Scenario-specific procedures
+  scenarios:
+    ransomware:
+      initial_actions:
+        - "Isolate affected systems from network (do NOT power off)"
+        - "Preserve ransomware note and any encrypted file samples"
+        - "Check if OT networks are affected or reachable from compromised systems"
+        - "Activate out-of-band communications"
+      containment:
+        - "Block known C2 infrastructure at network perimeter"
+        - "Disable affected user accounts"
+        - "Segment OT networks if not already isolated"
+      key_decisions:
+        - "Ransom payment: involve legal, insurance carrier, FBI before any payment"
+        - "CIRCIA requires reporting ransomware payments within 24 hours"
+      recovery:
+        - "Restore from offline backups (verify backup integrity first)"
+        - "Rebuild affected systems from clean media"
+        - "Staged recovery: critical OT systems first, then IT"
+
+    ics_compromise:
+      initial_actions:
+        - "Consult OT engineering BEFORE any containment action"
+        - "Verify physical process status through independent sensors"
+        - "Capture PLC/RTU memory and logic for forensic analysis"
+        - "Enable enhanced network monitoring on OT segments"
+      containment:
+        - "NEVER disable safety systems as a containment measure"
+        - "Consider switching to manual control if automated systems are untrusted"
+        - "Isolate compromised engineering workstations"
+      key_decisions:
+        - "Manual operation vs. automated: risk assessment with process engineers"
+        - "Whether to halt process operations for forensic investigation"
+      recovery:
+        - "Restore PLC logic from verified offline backups"
+        - "Validate restored logic against engineering specifications"
+        - "Staged restart with continuous monitoring"
+
+    supply_chain:
+      initial_actions:
+        - "Identify all systems running the compromised software/update"
+        - "Check vendor advisories and CISA alerts"
+        - "Inventory affected endpoints across IT and OT"
+      containment:
+        - "Block update mechanisms for compromised vendor software"
+        - "Isolate systems running affected versions"
+        - "Revoke and rotate any credentials the software had access to"
+      recovery:
+        - "Apply vendor-provided patches or roll back to known-good version"
+        - "Conduct threat hunt for indicators specific to the supply chain compromise"
+
+  # Communication templates
+  communications:
+    internal_notification:
+      audience: "IR team, executive leadership, legal"
+      template: |
+        INCIDENT NOTIFICATION
+        Severity: [CRITICAL/HIGH/MEDIUM/LOW]
+        Time detected: [TIMESTAMP]
+        Summary: [Brief description]
+        Systems affected: [List]
+        OT impact: [Yes/No/Under investigation]
+        Current status: [Detection/Containment/Recovery]
+        Next briefing: [TIME]
+
+    cisa_report:
+      audience: "CISA"
+      method: "cisa.gov/report or 888-282-0870"
+      required_info:
+        - "Organization name and sector"
+        - "Point of contact"
+        - "Incident description and timeline"
+        - "Affected systems and scope"
+        - "Indicators of compromise (IOCs)"
+        - "Actions taken"
+
+  # Evidence preservation priorities
+  evidence_priority:
+    immediate:
+      - "Network traffic captures (PCAP) from OT network segments"
+      - "PLC/RTU memory dumps"
+      - "Process historian data export"
+      - "Active session information and running processes"
+    within_1_hour:
+      - "System logs (Windows Event, syslog, ICS application logs)"
+      - "Firewall and IDS/IPS logs"
+      - "Authentication logs (AD, RADIUS, local accounts)"
+    within_24_hours:
+      - "Full disk images of compromised systems"
+      - "Backup integrity verification"
+      - "Vendor remote access logs"
